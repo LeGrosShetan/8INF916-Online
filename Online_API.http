@@ -1,3 +1,4 @@
+// Je sais pas trop a quoi sert ce fichier, mais ca semble être une alternative à Postman pour tester des requêtes
 @Online_API_HostAddress = http://localhost:5005
 
 GET {{Online_API_HostAddress}}/weatherforecast/
