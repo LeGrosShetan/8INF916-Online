@@ -21,6 +21,8 @@ public class UserController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<User>> Register(UserRegistrationDto registrationDto)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
         if (await UserExists(registrationDto.Email))
             return BadRequest("Email already exists");
 
@@ -43,6 +45,8 @@ public class UserController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginModel model)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
         var user = _context.Users.SingleOrDefault(u => u.Username == model.Username);
 
         if (user == null || !VerifyPasswordHash(model.Password, user.Password, user.Salt))
@@ -63,7 +67,7 @@ public class UserController : ControllerBase
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Username)
         };
         var token = new JwtSecurityToken(claims: claims, expires: DateTime.Now.AddHours(1), signingCredentials: credentials);

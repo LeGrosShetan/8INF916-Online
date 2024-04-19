@@ -1,9 +1,11 @@
-﻿public class User
+﻿using System.ComponentModel.DataAnnotations;
+
+public class User
 {
-    public int ID { get; set; }
-    public string Email { get; set; }
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public string Salt { get; set; }
-    public int RoleID { get; set; }
+    public int Id { get; set; }
+    [Required] [MinLength(1)] public string Email { get; set; } = string.Empty;
+    [Required] [MinLength(1)] public string Username { get; set; } = string.Empty;
+    [Required] [MinLength(1)] public string Password { get; set; } = string.Empty;
+    [Required] [MinLength(1)] public string Salt { get; set; } = string.Empty;
+    public int RoleId { get; set; }
 }
