@@ -4,21 +4,44 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase
+public class UserController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
-    public AuthController(ApplicationDbContext context)
+    public UserController(ApplicationDbContext context)
     {
         _context = context;
     }
+    
+    [HttpPost("register")]
+    public async Task<ActionResult<User>> Register(UserRegistrationDto registrationDto)
+    {
+        if (await UserExists(registrationDto.Email))
+            return BadRequest("Email already exists");
+
+        using var hmac = new HMACSHA512();
+
+        var user = new User
+        {
+            Email = registrationDto.Email,
+            Username = registrationDto.Username,
+            Password = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(registrationDto.Password))),
+            Salt = Convert.ToBase64String(hmac.Key)
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return StatusCode(201);  // Created
+    }
 
     [HttpPost("login")]
-    public IActionResult Authenticate([FromBody] LoginModel model)
+    public IActionResult Login([FromBody] LoginModel model)
     {
         var user = _context.Users.SingleOrDefault(u => u.Username == model.Username);
 
@@ -27,6 +50,11 @@ public class AuthController : ControllerBase
 
         var token = GenerateJwtToken(user);
         return Ok(token);
+    }
+    
+    private async Task<bool> UserExists(string email)
+    {
+        return await _context.Users.AnyAsync(x => x.Email == email);
     }
 
     private string GenerateJwtToken(User user)
