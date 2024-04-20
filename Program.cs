@@ -34,6 +34,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireLoggedIn", policy => policy.RequireAuthenticatedUser());
+});
+
 // anything past this line trying to add things to builder will result in an error
 var app = builder.Build();
 

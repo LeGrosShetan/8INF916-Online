@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -19,6 +20,7 @@ public class UserController : ControllerBase
     }
     
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<ActionResult<User>> Register(UserRegistrationDto registrationDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -43,6 +45,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public IActionResult Login([FromBody] LoginModel model)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
