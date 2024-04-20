@@ -35,7 +35,8 @@ public class UserController : ControllerBase
             Email = registrationDto.Email,
             Username = registrationDto.Username,
             Password = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(registrationDto.Password))),
-            Salt = Convert.ToBase64String(hmac.Key)
+            Salt = Convert.ToBase64String(hmac.Key),
+            RoleId = 1
         };
 
         _context.Users.Add(user);
@@ -51,8 +52,8 @@ public class UserController : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
         var user = _context.Users.SingleOrDefault(u => u.Username == model.Username);
-
-        if (user == null || !VerifyPasswordHash(model.Password, user.Password, user.Salt))
+        Console.WriteLine("$username recu : "+ model.Username +" mot de passe recu" +model.Password); // debug line  lol 
+        if (user == null || VerifyPasswordHash(model.Password, user.Password, user.Salt))
             return BadRequest("Username or password is incorrect");
 
         var token = GenerateJwtToken(user);

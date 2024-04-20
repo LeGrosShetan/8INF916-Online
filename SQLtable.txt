@@ -1,0 +1,43 @@
+-- Table: public.Users
+
+-- DROP TABLE IF EXISTS public."Users";
+
+CREATE TABLE IF NOT EXISTS public."Users"
+(
+    "Id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "Username" character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    "Email" character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    "Password" character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    "Salt" character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    "RoleId" integer,
+    CONSTRAINT "User_pkey" PRIMARY KEY ("Id"),
+    CONSTRAINT "User_email_key" UNIQUE ("Email"),
+    CONSTRAINT "User_username_key" UNIQUE ("Username"),
+    CONSTRAINT "User_role_id_fkey" FOREIGN KEY ("RoleId")
+        REFERENCES public.role (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."Users"
+    OWNER to test;
+-----------------------------------------
+
+-- Table: public.role
+
+-- DROP TABLE IF EXISTS public.role;
+
+CREATE TABLE IF NOT EXISTS public.role
+(
+    id integer NOT NULL DEFAULT nextval('role_id_seq'::regclass),
+    name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT role_pkey PRIMARY KEY (id),
+    CONSTRAINT role_name_key UNIQUE (name)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.role
+    OWNER to test;
