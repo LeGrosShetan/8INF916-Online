@@ -1,3 +1,24 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Table: public.role
+
+-- DROP TABLE IF EXISTS public.role;
+
+CREATE TABLE IF NOT EXISTS public.role
+(
+    id Serial,
+    name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT role_pkey PRIMARY KEY (id),
+    CONSTRAINT role_name_key UNIQUE (name)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.role
+    OWNER to test;
+	
+-----------------------------------------
+
 -- Table: public.Users
 
 -- DROP TABLE IF EXISTS public."Users";
@@ -23,21 +44,7 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public."Users"
     OWNER to test;
------------------------------------------
 
--- Table: public.role
-
--- DROP TABLE IF EXISTS public.role;
-
-CREATE TABLE IF NOT EXISTS public.role
-(
-    id integer NOT NULL DEFAULT nextval('role_id_seq'::regclass),
-    name character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT role_pkey PRIMARY KEY (id),
-    CONSTRAINT role_name_key UNIQUE (name)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.role
-    OWNER to test;
+INSERT INTO public.role(
+	id, name)
+	VALUES (1, 'Player'), (2,'Dedicated Game Server');
