@@ -1,12 +1,33 @@
+-- AVANT D'EXECUTER CE CODE, QUELQUES ETAPES :
+-- - CREER UN USER "test" avec pour password "password"
+-- - CREER LA DB "my_api_rest"
+-- - DONNER LES TOUTES LES PERMS A test (GRANT ALL PRIVILEGES ON DATABASE my_api_rest TO test)
+-- - EN ETANT CONNECTE A my_api_rest, DONNER LES PERMS A TEST SUR LE SCHEMA public (GRANT ALL PRIVILEGES ON SCHEMA public TO test)
+-- - EXECUTER CE SCRIPT
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE SEQUENCE role_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+	
+CREATE SEQUENCE achievements_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 -- Table: public.role
 
--- DROP TABLE IF EXISTS public.role;
+-- DROP TABLE IF EXISTS public."role";
 
 CREATE TABLE IF NOT EXISTS public.role
 (
-    id Serial,
+    id integer NOT NULL DEFAULT nextval('role_id_seq'::regclass),
     name character varying(255) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT role_pkey PRIMARY KEY (id),
     CONSTRAINT role_name_key UNIQUE (name)
@@ -44,7 +65,58 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public."Users"
     OWNER to test;
+	
+-----------------------------------------
+
+-- Table: public.Achievements
+
+-- DROP TABLE IF EXISTS public."Achievements";
+	
+CREATE TABLE IF NOT EXISTS public."Achievements"
+(
+	"Id" integer NOT NULL DEFAULT nextval('achievements_id_seq'::regclass),
+	"Name" text NOT NULL,
+	"Description" text NOT NULL,
+	"Image" text NOT NULL,
+	CONSTRAINT "Achievement_pkey" PRIMARY KEY ("Id"),
+	CONSTRAINT "Achievement_name_key" UNIQUE ("Name")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."Achievements"
+    OWNER to test;
+	
+-----------------------------------------
+
+-- Table: public.AchievementsUsers
+
+-- DROP TABLE IF EXISTS public."AchievementsUsers";
+
+CREATE TABLE IF NOT EXISTS public."AchievementsUsers"
+(
+	"UserId" uuid,
+	"AchievementId" integer,
+	CONSTRAINT "UsersAchievements_pkey" PRIMARY KEY ("UserId","AchievementId"),
+	CONSTRAINT "UsersAchievements_user_id_fkey" FOREIGN KEY ("UserId")
+        REFERENCES public."Users"("Id") MATCH SIMPLE
+        ON DELETE CASCADE,
+	CONSTRAINT "UsersAchievements_achievement_id_fkey" FOREIGN KEY ("AchievementId")
+        REFERENCES public."Achievements"("Id") MATCH SIMPLE
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."AchievementsUsers"
+    OWNER to test;
+	
+-----------------------------------------
 
 INSERT INTO public.role(
-	id, name)
-	VALUES (1, 'Player'), (2,'Dedicated Game Server');
+	name)
+	VALUES ('Player'), ('Dedicated Game Server');
+	
+INSERT INTO public."Achievements"(
+	"Name", "Description", "Image")
+	VALUES ('Hello world !', 'Join a server for the first time', 'Placeholder'), ('Redrum !', 'Kill another player for the first time', 'Placeholder');
