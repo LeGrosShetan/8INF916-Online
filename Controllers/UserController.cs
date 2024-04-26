@@ -12,11 +12,14 @@ using Microsoft.EntityFrameworkCore;
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private ApplicationDbContext _context;
+    private IConfiguration _config;
 
-    public UserController(ApplicationDbContext context)
+    public UserController(ApplicationDbContext context,
+        IConfiguration config)
     {
         _context = context;
+        _config = config;
     }
     
     [HttpPost("register")]
@@ -60,6 +63,21 @@ public class UserController : ControllerBase
         return Ok(token);
     }
     
+    [HttpGet("achievements")]
+    [Authorize]
+    public IActionResult GetUserAchievements()
+    {
+        // Accessing claims directly
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+
+        // You can also access custom claims by specifying the exact claim type
+        //var customClaim = User.FindFirst("customClaimType")?.Value;
+
+        //return Ok(new { UserId = userId, UserName = userName, CustomClaim = customClaim });
+        return Ok(new { UserId = userId, UserName = userName});
+    }
+    
     private async Task<bool> UserExists(string email)
     {
         return await _context.Users.AnyAsync(x => x.Email == email);
@@ -76,7 +94,13 @@ public class UserController : ControllerBase
             new Claim(ClaimTypes.Role, user.RoleId.ToString()),
             new Claim(JwtRegisteredClaimNames.Exp, DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
-        var token = new JwtSecurityToken(claims: claims, expires: DateTime.Now.AddHours(1), signingCredentials: credentials);
+        
+        var token = new JwtSecurityToken(_config["Jwt:Issuer"],
+            _config["Jwt:Issuer"],
+            claims: claims, 
+            expires: DateTime.Now.AddHours(1), 
+            signingCredentials: credentials);
+        
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
