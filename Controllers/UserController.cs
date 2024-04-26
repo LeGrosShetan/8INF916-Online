@@ -56,37 +56,12 @@ public class UserController : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
         var user = _context.Users.SingleOrDefault(u => u.Username == model.Username);
-        Console.WriteLine("$username recu : "+ model.Username +" mot de passe recu" +model.Password); // debug line  lol 
+        
         if (user == null || VerifyPasswordHash(model.Password, user.Password, user.Salt))
             return BadRequest("Username or password is incorrect");
 
         var token = GenerateJwtToken(user);
         return Ok(token);
-    }
-    
-    [HttpGet("achievements")]
-    [Authorize]
-    public IActionResult GetUserAchievements()
-    {
-        // Accessing claims directly
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        List<AchievementsUsers> filteredUserAchievements = _context.AchievementsUsers.Where(au => au.UserId.ToString().Equals(userId)).ToList();
-        List<Achievement> achievementsRes = new List<Achievement>();
-
-        foreach (AchievementsUsers SingularAchievement in filteredUserAchievements)
-        {
-            var achievement = _context.Achievements.Find(SingularAchievement.AchievementId);
-            if (achievement != null)
-            {
-                achievementsRes.Add(achievement);
-            }
-        }
-
-        // You can also access custom claims by specifying the exact claim type
-        //var customClaim = User.FindFirst("customClaimType")?.Value;
-
-        //return Ok(new { UserId = userId, UserName = userName, CustomClaim = customClaim });
-        return Ok(new { UserId = userId, Achievements = achievementsRes});
     }
     
     private async Task<bool> UserExists(string email)

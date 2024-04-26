@@ -8,6 +8,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<AchievementsUsers> AchievementsUsers { get; set; }
     
     public DbSet<Achievement> Achievements { get; set; }
+    
+    public DbSet<Role> Roles { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

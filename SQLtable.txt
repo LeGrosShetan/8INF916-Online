@@ -21,21 +21,21 @@ CREATE SEQUENCE achievements_id_seq
     NO MAXVALUE
     CACHE 1;
 
--- Table: public.role
+-- Table: public."Roles"
 
--- DROP TABLE IF EXISTS public."role";
+-- DROP TABLE IF EXISTS public."Roles";
 
-CREATE TABLE IF NOT EXISTS public.role
+CREATE TABLE IF NOT EXISTS public."Roles"
 (
-    id integer NOT NULL DEFAULT nextval('role_id_seq'::regclass),
-    name character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT role_pkey PRIMARY KEY (id),
-    CONSTRAINT role_name_key UNIQUE (name)
+    "Id" integer NOT NULL DEFAULT nextval('role_id_seq'::regclass),
+    "Name" character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT role_pkey PRIMARY KEY ("Id"),
+    CONSTRAINT role_name_key UNIQUE ("Name")
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.role
+ALTER TABLE IF EXISTS public."Roles"
     OWNER to test;
 	
 -----------------------------------------
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS public."Users"
     CONSTRAINT "User_email_key" UNIQUE ("Email"),
     CONSTRAINT "User_username_key" UNIQUE ("Username"),
     CONSTRAINT "User_role_id_fkey" FOREIGN KEY ("RoleId")
-        REFERENCES public.role (id) MATCH SIMPLE
+        REFERENCES public."Roles" ("Id") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
@@ -113,8 +113,8 @@ ALTER TABLE IF EXISTS public."AchievementsUsers"
 	
 -----------------------------------------
 
-INSERT INTO public.role(
-	name)
+INSERT INTO public."Roles"(
+	"Name")
 	VALUES ('Player'), ('Dedicated Game Server');
 	
 INSERT INTO public."Achievements"(
