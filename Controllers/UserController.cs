@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Online_API.Models;
 
 
 [Route("api/[controller]")]
@@ -69,13 +70,23 @@ public class UserController : ControllerBase
     {
         // Accessing claims directly
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+        List<AchievementsUsers> filteredUserAchievements = _context.AchievementsUsers.Where(au => au.UserId.ToString().Equals(userId)).ToList();
+        List<Achievement> achievementsRes = new List<Achievement>();
+
+        foreach (AchievementsUsers SingularAchievement in filteredUserAchievements)
+        {
+            var achievement = _context.Achievements.Find(SingularAchievement.AchievementId);
+            if (achievement != null)
+            {
+                achievementsRes.Add(achievement);
+            }
+        }
 
         // You can also access custom claims by specifying the exact claim type
         //var customClaim = User.FindFirst("customClaimType")?.Value;
 
         //return Ok(new { UserId = userId, UserName = userName, CustomClaim = customClaim });
-        return Ok(new { UserId = userId, UserName = userName});
+        return Ok(new { UserId = userId, Achievements = achievementsRes});
     }
     
     private async Task<bool> UserExists(string email)
