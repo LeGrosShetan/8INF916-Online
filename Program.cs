@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using StackExchange.Redis;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configure Redis services
+var redisConfiguration = builder.Configuration.GetConnectionString("RedisConnection");
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConfiguration));
+builder.Services.AddScoped<IDatabase>(sp =>
+{
+    var connectionMultiplexer = sp.GetRequiredService<IConnectionMultiplexer>();
+    return connectionMultiplexer.GetDatabase();
+});
 
+builder.Services.AddScoped<GameServerService>();
 
 // Configure PostgreSQL database
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -53,6 +63,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
