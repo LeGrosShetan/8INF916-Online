@@ -64,6 +64,66 @@ public class UserController : ControllerBase
         return Ok(token);
     }
     
+    [HttpGet("rank")]
+    [Authorize]
+    public IActionResult GetUserRank([FromBody] Guid UserId)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        var user = _context.Users.Find(UserId);
+        
+        if (user == null)
+            return NotFound("User not found");
+
+        var rank =_context.Ranks.Find(_context.UsersRanks.Find(UserId)?.RankId);
+
+        if (rank == null) return NotFound("User is not ranked yet");
+        
+        return Ok(rank);
+    }
+    
+    [HttpPost("updateRank")]
+    [Authorize]
+    public IActionResult SetUserRank([FromBody] UpdateModel updateModel)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        var jwtUserRoleId = User.FindFirst(ClaimTypes.Role)?.Value;
+        if (jwtUserRoleId.IsNullOrEmpty() ||
+            !"Dedicated Game Server".Equals(_context.Roles.Find(Int32.Parse(jwtUserRoleId))?.Name))
+        {
+            return Unauthorized("Vous ne disposez pas des permissions nécessaires");
+        }
+        
+        var user = _context.Users.Find(updateModel.UserId);
+        
+        if (user == null)
+            return NotFound("User not found");
+
+        var rank =_context.Ranks.Find(updateModel.RankId);
+
+        if (rank == null) return NotFound("Rank doesnt exist");
+        
+        var UREntry = _context.UsersRanks.Find(updateModel.UserId);
+        if (UREntry == null)
+        {
+            var newUsersRanks = new UsersRanks();
+            newUsersRanks.UserId = updateModel.UserId;
+            newUsersRanks.RankId = updateModel.RankId;
+            
+            _context.UsersRanks.Add(newUsersRanks);
+        }
+        else
+        {
+            UREntry.RankId = updateModel.RankId;
+            _context.Entry(UREntry).State = EntityState.Modified;
+        }
+
+        _context.SaveChanges();
+        
+        return Ok(_context.UsersRanks.Find(updateModel.UserId));
+    }
+    
     private async Task<bool> UserExists(string email)
     {
         return await _context.Users.AnyAsync(x => x.Email == email);

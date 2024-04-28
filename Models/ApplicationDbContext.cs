@@ -10,6 +10,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<Achievement> Achievements { get; set; }
     
     public DbSet<Role> Roles { get; set; }
+    
+    public DbSet<Rank> Ranks { get; set; }
+    
+    public DbSet<UsersRanks> UsersRanks { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -21,5 +25,8 @@ public class ApplicationDbContext : DbContext
         
         modelBuilder.Entity<AchievementsUsers>()
             .HasKey(ua => new { ua.UserId, ua.AchievementId }); // Composite primary key
+        
+        modelBuilder.Entity<UsersRanks>()
+            .HasKey(ur => new { ur.UserId}); // Composite primary key
     }
 }
