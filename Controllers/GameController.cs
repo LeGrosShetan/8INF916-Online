@@ -16,7 +16,7 @@ public class GameController : ControllerBase
     [HttpPost("save")]
     public async Task<IActionResult> SaveGameServer([FromBody] RedisGameServer server)
     {
-        bool result = await _gameServerService.SaveGameServerAsync("someKey", server);
+        bool result = await _gameServerService.SaveGameServerAsync(server.Ip, server);
         if (result)
             return Ok();
         else
@@ -24,9 +24,9 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("get")]
-    public async Task<IActionResult> GetGameServer()
+    public async Task<IActionResult> GetGameServer([FromBody] string serverIp)
     {
-        RedisGameServer server = await _gameServerService.GetGameServerAsync("someKey");
+        RedisGameServer server = await _gameServerService.GetGameServerAsync(serverIp);
         if (server != null)
             return Ok(server);
         else
