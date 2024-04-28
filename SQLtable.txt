@@ -110,6 +110,48 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public."AchievementsUsers"
     OWNER to test;
+    
+-----------------------------------------
+
+-- Table: public.Ranks
+
+-- DROP TABLE IF EXISTS public."Ranks";
+
+CREATE TABLE IF NOT EXISTS public."Ranks"
+(
+	"Id" integer NOT NULL,
+	"Title" text NOT NULL,
+	CONSTRAINT "Ranks_pkey" PRIMARY KEY ("Id")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."Ranks"
+    OWNER to test;
+    
+-----------------------------------------
+
+-- Table: public.UsersRanks
+
+-- DROP TABLE IF EXISTS public."UsersRanks";
+
+CREATE TABLE IF NOT EXISTS public."UsersRanks"
+(
+	"UserId" uuid,
+	"RankId" integer,
+	CONSTRAINT "UsersRanks_pkey" PRIMARY KEY ("UserId"),
+	CONSTRAINT "UsersRanks_user_id_fkey" FOREIGN KEY ("UserId")
+        REFERENCES public."Users"("Id") MATCH SIMPLE
+        ON DELETE CASCADE,
+	CONSTRAINT "UsersRanks_rank_id_fkey" FOREIGN KEY ("RankId")
+        REFERENCES public."Ranks"("Id") MATCH SIMPLE
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."UsersRanks"
+    OWNER to test;
 	
 -----------------------------------------
 
@@ -120,3 +162,5 @@ INSERT INTO public."Roles"(
 INSERT INTO public."Achievements"(
 	"Name", "Description", "Image")
 	VALUES ('Hello world !', 'Join a server for the first time', 'Placeholder'), ('Redrum !', 'Kill another player for the first time', 'Placeholder');
+	
+INSERT INTO public."Ranks"("Id","Title") VALUES (1,'Bronze'),(2,'Argent'),(3,'Or'),(4,'Platine'),(5,'Diamant')	
