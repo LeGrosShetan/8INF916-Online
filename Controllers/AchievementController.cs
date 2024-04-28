@@ -82,8 +82,7 @@ public class AchievementController : ControllerBase
 
         // Vérification du grant + Role suffisant
         var grantedUserId = _context.Users.Find(grantAchievementDto.UserId)?.Id;
-        var grantedUserRoleId = _context.Users.Find(grantAchievementDto.UserId)?.RoleId;
-        if (grantedUserId.ToString().IsNullOrEmpty() || grantedUserRoleId.ToString().IsNullOrEmpty() || !"Dedicated Game Server".Equals(_context.Roles.Find(grantedUserRoleId)?.Name))
+        if (grantedUserId.ToString().IsNullOrEmpty() || !"Dedicated Game Server".Equals(_context.Roles.Find(Int32.Parse(jwtUserRoleId))?.Name))
         {
             return false;
         }
