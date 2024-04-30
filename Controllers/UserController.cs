@@ -70,7 +70,7 @@ public class UserController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
-        var jwtUserId = User.FindFirst(ClaimTypes.Role)?.Value;
+        var jwtUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var jwtUserRoleId = User.FindFirst(ClaimTypes.Role)?.Value;
         if (jwtUserId.IsNullOrEmpty() || jwtUserRoleId.IsNullOrEmpty())
         {
