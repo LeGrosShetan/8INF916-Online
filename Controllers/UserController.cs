@@ -29,8 +29,11 @@ public class UserController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
-        if (await UserExists(registrationDto.Email))
+        if (await EmailExists(registrationDto.Email))
             return BadRequest("Email already exists");
+        
+        if (await UsernameExists(registrationDto.Username))
+            return BadRequest("Username already exists");
 
         using var hmac = new HMACSHA512();
 
@@ -95,7 +98,7 @@ public class UserController : ControllerBase
         var user = _context.Users.Find(UserId);
         
         if (user == null)
-            return NotFound("User not found");
+            return BadRequest("User not found");
 
         var rank =_context.Ranks.Find(_context.UsersRanks.Find(UserId)?.RankId);
 
@@ -146,9 +149,14 @@ public class UserController : ControllerBase
         return Ok(_context.UsersRanks.Find(updateModel.UserId));
     }
     
-    private async Task<bool> UserExists(string email)
+    private async Task<bool> EmailExists(string email)
     {
         return await _context.Users.AnyAsync(x => x.Email == email);
+    }
+    
+    private async Task<bool> UsernameExists(string username)
+    {
+        return await _context.Users.AnyAsync(x => x.Username == username);
     }
 
     private string GenerateJwtToken(User user)

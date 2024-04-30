@@ -26,7 +26,7 @@ public class AchievementController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId.IsNullOrEmpty())
         {
-            return Unauthorized();
+            return Unauthorized("JWT's UserId is empty or null");
         }
         
         List<AchievementsUsers> filteredUserAchievements = _context.AchievementsUsers.Where(au => au.UserId.ToString().Equals(userId)).ToList();
@@ -57,7 +57,12 @@ public class AchievementController : ControllerBase
 
         if (!VerifyGrantParams(grantAchievementDto))
         {
-            return Unauthorized();
+            return Unauthorized("Invalid JWT token : verify it's structure and/or your user's permissions");
+        }
+
+        if (_context.AchievementsUsers.Find(grantAchievementDto.UserId, grantAchievementDto.AchievementId) != null)
+        {
+            return Conflict("User already has this achievement !");
         }
 
         AchievementsUsers newAchievementsUsers = new AchievementsUsers();
@@ -73,7 +78,7 @@ public class AchievementController : ControllerBase
     private bool VerifyGrantParams(GrantAchievementDTO grantAchievementDto)
     {
         // Vérification JWT
-        var jwtUserId = User.FindFirst(ClaimTypes.Role)?.Value;
+        var jwtUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var jwtUserRoleId = User.FindFirst(ClaimTypes.Role)?.Value;
         if (jwtUserRoleId.IsNullOrEmpty() || jwtUserId.IsNullOrEmpty())
         {
