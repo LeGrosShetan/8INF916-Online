@@ -63,6 +63,28 @@ public class UserController : ControllerBase
         var token = GenerateJwtToken(user);
         return Ok(token);
     }
+
+    [HttpGet("user")]
+    [Authorize]
+    public IActionResult GetUserIdFromJWT()
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        var jwtUserId = User.FindFirst(ClaimTypes.Role)?.Value;
+        var jwtUserRoleId = User.FindFirst(ClaimTypes.Role)?.Value;
+        if (jwtUserId.IsNullOrEmpty() || jwtUserRoleId.IsNullOrEmpty())
+        {
+            return Unauthorized("Invalid JWT token");
+        }
+        
+        var user = _context.Users.Find(jwtUserId);
+        if (user == null)
+        {
+            return BadRequest("User was not found");
+        }
+
+        return Ok(new {Id = user.Id, Username = user.Username});
+    }
     
     [HttpGet("rank")]
     [Authorize]
