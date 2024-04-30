@@ -55,6 +55,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireLoggedIn", policy => policy.RequireAuthenticatedUser());
 });
 
+builder.WebHost.UseUrls("http://0.0.0.0:8000");
+
 // anything past this line trying to add things to builder will result in an error
 var app = builder.Build();
 
