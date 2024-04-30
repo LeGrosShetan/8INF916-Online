@@ -77,7 +77,7 @@ public class UserController : ControllerBase
             return Unauthorized("Invalid JWT token");
         }
         
-        var user = _context.Users.Find(jwtUserId);
+        var user = _context.Users.Find(new Guid(jwtUserId));
         if (user == null)
         {
             return BadRequest("User was not found");
