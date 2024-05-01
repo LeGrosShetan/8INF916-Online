@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 
 namespace Online_API.Controllers;
 
@@ -29,18 +28,9 @@ public class GameController : ControllerBase
      */
     [HttpPost("save")]
     [Authorize]
-    public async Task<IActionResult> SaveGameServer([FromBody] string serializedServer)
+    public async Task<IActionResult> SaveGameServer([FromBody] RedisGameServer server)
     {
-        if (string.IsNullOrEmpty(serializedServer))
-        {
-            return BadRequest("Request's body is incorrect");
-        }
-        
-        RedisGameServer server = JsonConvert.DeserializeObject<RedisGameServer>(serializedServer);
-        if (server == null)
-        {
-            return BadRequest("An error occured while desirializing server");
-        }
+        if (!ModelState.IsValid) return BadRequest(ModelState);
         
         var jwtUserRoleId = User.FindFirst(ClaimTypes.Role)?.Value;
         if (string.IsNullOrEmpty(jwtUserRoleId) ||
