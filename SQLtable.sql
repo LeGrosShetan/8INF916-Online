@@ -163,4 +163,6 @@ INSERT INTO public."Achievements"(
 	"Name", "Description", "Image")
 	VALUES ('Hello world !', 'Join a server for the first time', 'Placeholder'), ('Redrum !', 'Kill another player for the first time', 'Placeholder');
 	
-INSERT INTO public."Ranks"("Id","Title") VALUES (1,'Bronze'),(2,'Argent'),(3,'Or'),(4,'Platine'),(5,'Diamant')	
+INSERT INTO public."Ranks"("Id","Title") VALUES (1,'Bronze'),(2,'Argent'),(3,'Or'),(4,'Platine'),(5,'Diamant');
+
+INSERT INTO public."Users"("Username","Email","Password","Salt","RoleId") VALUES('server','testserver@gmail.com', 'NrIbnmMkwpk5P5DhDgM2KqFyI7gdR0hIpGXKs90K6WfOfHO9tvgvmq9+9P88/vUujYi8maqqPQKu6QUZPGiQKw==', '3TPxs/oS/YZKBASB79/8lk1E7myAoviriSA/pLK92WYyVZhlMGwbDWAA/sQilBpj2ctym/MfIjGv0ffKEmZJ+CO8hxxpTBlMkTdrh5uU/1JyRPz6gdiKOlYwPazIGdD8wClEOYJGOl6yHWGTqGzFDI83TCa+VjzHaL/kOq5OB4w=', '2')
