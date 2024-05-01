@@ -51,6 +51,13 @@ public class GameController : ControllerBase
     public async Task<IActionResult> AddPlayerToServer([FromBody] ServerPlayersModification playersModification)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        var jwtUserRoleId = User.FindFirst(ClaimTypes.Role)?.Value;
+        if (string.IsNullOrEmpty(jwtUserRoleId) ||
+            !"Dedicated Game Server".Equals(_context.Roles.Find(Int32.Parse(jwtUserRoleId))?.Name))
+        {
+            return Unauthorized("User does not have DGS permissions");
+        }
 
         RedisGameServer server = await _gameServerService.GetGameServerAsync(playersModification.ServerIp);
         if (server == null)
@@ -76,6 +83,13 @@ public class GameController : ControllerBase
     public async Task<IActionResult> RemovePlayerToServer([FromBody] ServerPlayersModification playersModification)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        var jwtUserRoleId = User.FindFirst(ClaimTypes.Role)?.Value;
+        if (string.IsNullOrEmpty(jwtUserRoleId) ||
+            !"Dedicated Game Server".Equals(_context.Roles.Find(Int32.Parse(jwtUserRoleId))?.Name))
+        {
+            return Unauthorized("User does not have DGS permissions");
+        }
 
         RedisGameServer server = await _gameServerService.GetGameServerAsync(playersModification.ServerIp);
         if (server == null)
