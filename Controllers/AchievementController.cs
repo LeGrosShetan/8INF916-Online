@@ -23,7 +23,7 @@ public class AchievementController : ControllerBase
      * <summary>Gets achievements for a user using it's Id</summary>
      * <returns>Status code 200 - OK containing user's Id as well as a list of his achievements</returns>
      */
-    [HttpGet("userIdAchievements")]
+    [HttpPost("userIdAchievements")]
     [Authorize]
     public IActionResult GetUserIdAchievements([FromBody] Guid UserId)
     {
