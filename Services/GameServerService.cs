@@ -13,6 +13,12 @@ public class GameServerService
         _db = database;
     }
     
+    /**
+     * <summary>Tries to register a server to redis database using it's IP as a key and a struct containing info on server as value</summary>
+     * <param name="key">The server's Ip</param>
+     * <param name="server">The struct containing server info that we want to save</param>
+     * <returns>A bool representing wether or not server has been saved. Additionally if true, server's Ip is saved in a list containing all registered server's ips</returns>
+     */
     public async Task<bool> SaveGameServerAsync(string key, RedisGameServer server)
     {
         string serializedServer = JsonConvert.SerializeObject(server);
@@ -24,9 +30,15 @@ public class GameServerService
         return isSaved;
     }
     
-    // Retrieve GameServer data from Redis
+    /**
+     * <summary>Try to retrieve server info using it's Ip</summary>
+     * <param name="key">The server's Ip</param>
+     * <returns>The server's info if it is found. Returns null otherwise</returns>
+     */
     public async Task<RedisGameServer> GetGameServerAsync(string key)
     {
+        if (string.IsNullOrEmpty(key)) return null;
+            
         string serializedServer = await _db.StringGetAsync(key);
         if (!string.IsNullOrEmpty(serializedServer))
         {
@@ -35,6 +47,10 @@ public class GameServerService
         return null;
     }
 
+    /**
+     * <summary>Retrieves a list of redis' registered servers</summary>
+     * <returns>A list containing all server infos of redis' registered servers</returns>
+     */
     public async Task<List<RedisGameServer>> GetAllGameServersAsync()
     {
         var serverKeys = await _db.SetMembersAsync(ServerKeySet); // Get all keys from the set
