@@ -1,6 +1,7 @@
-﻿public class RedisGameServer
+﻿using System.ComponentModel.DataAnnotations;
+public class RedisGameServer
 {
-    public string Ip { get; set; }
-    public List<Guid> PlayerUuids { get; set; }
-    public string MapName { get; set; }
+    [Required] public string Ip { get; set; }
+    [Required] public List<Guid> PlayerUuids { get; set; }
+    [Required] public string MapName { get; set; }
 }
