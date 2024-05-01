@@ -46,6 +46,56 @@ public class GameController : ControllerBase
             return BadRequest("An error occured while saving the game server");
     }
 
+    [HttpPost("addPlayer")]
+    [Authorize]
+    public async Task<IActionResult> AddPlayerToServer([FromBody] ServerPlayersModification playersModification)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        RedisGameServer server = await _gameServerService.GetGameServerAsync(playersModification.ServerIp);
+        if (server == null)
+        {
+            return NotFound("Server not found");
+        }
+
+        User? user = _context.Users.SingleOrDefault(u => u.Id.ToString().Equals(playersModification.UserId));
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+        
+        server.PlayerUuids.Add(user.Id);
+
+        await _gameServerService.SaveGameServerAsync(server.Ip, server);
+        
+        return Ok(server.PlayerUuids);
+    }
+    
+    [HttpPost("removePlayer")]
+    [Authorize]
+    public async Task<IActionResult> RemovePlayerToServer([FromBody] ServerPlayersModification playersModification)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        RedisGameServer server = await _gameServerService.GetGameServerAsync(playersModification.ServerIp);
+        if (server == null)
+        {
+            return NotFound("Server not found");
+        }
+
+        User? user = _context.Users.SingleOrDefault(u => u.Id.ToString().Equals(playersModification.UserId));
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+        
+        server.PlayerUuids.Remove(user.Id);
+
+        await _gameServerService.SaveGameServerAsync(server.Ip, server);
+        
+        return Ok(server.PlayerUuids);
+    }
+
     /**
      * <summary>Tries to retrieve a server from redis' database using it's IP</summary>
      * <param name="serverIp">The Ip of the server we want info on</param>
