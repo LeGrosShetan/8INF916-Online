@@ -205,7 +205,6 @@ public class UserController : ControllerBase
      */
     private string GenerateJwtToken(User user)
     {
-        // TODO : Add global variable for SecretKey
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SymmetricSecurityKey"]));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var claims = new[]
