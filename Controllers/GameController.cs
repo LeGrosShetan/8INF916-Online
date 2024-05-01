@@ -74,6 +74,13 @@ public class GameController : ControllerBase
         return Ok(servers);
     }
 
+    /**
+     * <summary>Tries to matchmake an authenticated user using his JWT. Matchmaking will try and find a sever whose playerRank mean is close to Auth user's rank</summary>
+     * <exception cref="UnauthorizedResult">Thrown if JWT is invalid</exception>
+     * <exception cref="NotFoundResult">Thrown if JWT's UserId is not stored in database, or if no server is up in redis' database</exception>
+     * <exception cref="BadRequestResult">Thrown if a DGS initiated the matchmaking</exception>
+     * <returns>Status code 200 - OK containing server info of either the best server based on connected player's rank mean or an empty server</returns>
+     */
     [HttpGet("matchmake")]
     [Authorize]
     public async Task<IActionResult> MatchmakeAuthUser()
@@ -88,6 +95,11 @@ public class GameController : ControllerBase
         if (user == null)
         {
             return NotFound("User not found");
+        }
+
+        if ("Dedicated Game Server".Equals(_context.Roles.SingleOrDefault(r => r.Id == user.RoleId)?.Name))
+        {
+            return BadRequest("A server cant be in queue for matchmaking !");
         }
         
         var server = await _gameServerService.MatchmakeForUser(user);

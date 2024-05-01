@@ -71,6 +71,14 @@ public class GameServerService
         return servers;
     }
 
+    /**
+     * <summary>Retrieves all redis' stored game servers and finds the best suitable server for a user to join based on the distance
+     * between his rank and the mean of the server's connected players' ranks</summary>
+     * <remarks>A list of players currently matchmaking (awaiting a response from their matchmaking call to connect to an Ip)
+     * could also do the trick, but seems only relevant when you want to join only servers that have not yet started their game</remarks>
+     * <param name="user">The user we matchmake for</param>
+     * <returns>The best suited server based on ranks distance, null if no servers are found in redis</returns>
+     */
     public async Task<RedisGameServer> MatchmakeForUser(User user)
     {
         var servers = await GetAllGameServersAsync();
@@ -97,6 +105,13 @@ public class GameServerService
         return bestServer;
     }
 
+    /**
+     * <summary>Retrieves a list of connected players to a redis game server and returns a mean of their ranks</summary>
+     * <remarks>A User that is not yet ranked will be considered as a Silver</remarks>
+     * <param name="gameServer">The redis game server we are studying</param>
+     * <returns>A players Rank mean computed direclty from their Rank's Id.
+     * If a server is empty, will return float.MaxValue to discourage matchmaking from choosing an empty server</returns>
+     */
     private float ComputeRankMean(RedisGameServer gameServer)
     {
         if (gameServer.PlayerUuids.Count == 0)
@@ -113,12 +128,23 @@ public class GameServerService
             {
                 playersRankMean += playerRankId.Value;
             }
+            else
+            {
+                playersRankMean += 2.0f;
+            }
         }
-        playersRankMean /= gameServer.PlayerUuids.Count;
+        playersRankMean /= (float)gameServer.PlayerUuids.Count;
         
         return playersRankMean;
     }
 
+    /**
+     * <summary>Returns the rank distance between the rank mean of a server's connected players and a user in matchmaking</summary>
+     * <remarks>A User that is not yet ranked will be considered as a Silver</remarks>
+     * <param name="user">The user currently in matchmaking</param>
+     * <param name="gameServer">A server that has 0..n connected players</param>
+     * <returns>A float of the absolute value of ServerRankMean - UserRankId</returns>
+     */
     private float ComputeRankDistance(User user, RedisGameServer gameServer)
     {
         var UserRankId = _context.UsersRanks.Find(user.Id)?.RankId;
@@ -127,6 +153,6 @@ public class GameServerService
             return float.Abs(ComputeRankMean(gameServer) - UserRankId.Value);
         }
         
-        return float.Abs(ComputeRankMean(gameServer) - 3.0f);
+        return float.Abs(ComputeRankMean(gameServer) - 2.0f);
     }
 }
