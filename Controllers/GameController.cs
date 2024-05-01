@@ -73,4 +73,28 @@ public class GameController : ControllerBase
         var servers = await _gameServerService.GetAllGameServersAsync();
         return Ok(servers);
     }
+
+    [HttpGet("matchmake")]
+    [Authorize]
+    public async Task<IActionResult> MatchmakeAuthUser()
+    {
+        var jwtUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(jwtUserId))
+        {
+            return Unauthorized("JWT token is invalid");
+        }
+
+        var user = _context.Users.SingleOrDefault(u => u.Id.ToString().Equals(jwtUserId));
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+        
+        var server = await _gameServerService.MatchmakeForUser(user);
+        if (server == null)
+        {
+            return NotFound("Servers are unavailable");
+        }
+        return Ok(server);
+    }
 }

@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 public class GameServerService
 {
     private readonly IDatabase _db;
+    private ApplicationDbContext _context;
     private const string ServerKeySet = "gameServers"; // Redis set to store all game server keys
 
-    public GameServerService(IDatabase database)
+    public GameServerService(IDatabase database,
+        ApplicationDbContext context)
     {
         _db = database;
+        _context = context;
     }
     
     /**
@@ -66,5 +69,64 @@ public class GameServerService
         }
 
         return servers;
+    }
+
+    public async Task<RedisGameServer> MatchmakeForUser(User user)
+    {
+        var servers = await GetAllGameServersAsync();
+        if (servers.Count == 0)
+        {
+            return null;
+        }
+
+        var bestServer = servers.First();
+        var bestServerRankDistance = ComputeRankDistance(user, bestServer);
+        foreach (var server in servers)
+        {
+            if(server.PlayerUuids.Count != 0)
+            {
+                var serverRankDistance = ComputeRankDistance(user, server);
+                if (serverRankDistance < bestServerRankDistance)
+                {
+                    bestServer = server;
+                    bestServerRankDistance = serverRankDistance;
+                }
+            }
+        }
+
+        return bestServer;
+    }
+
+    private float ComputeRankMean(RedisGameServer gameServer)
+    {
+        if (gameServer.PlayerUuids.Count == 0)
+        {
+            return float.MaxValue;
+        }
+        
+        var playersRankMean = 0.0f;
+        
+        foreach (var playerId in gameServer.PlayerUuids)
+        {
+            var playerRankId = _context.UsersRanks.Find(playerId)?.RankId;
+            if(playerRankId.HasValue)
+            {
+                playersRankMean += playerRankId.Value;
+            }
+        }
+        playersRankMean /= gameServer.PlayerUuids.Count;
+        
+        return playersRankMean;
+    }
+
+    private float ComputeRankDistance(User user, RedisGameServer gameServer)
+    {
+        var UserRankId = _context.UsersRanks.Find(user.Id)?.RankId;
+        if(UserRankId.HasValue)
+        {
+            return float.Abs(ComputeRankMean(gameServer) - UserRankId.Value);
+        }
+        
+        return float.Abs(ComputeRankMean(gameServer) - 3.0f);
     }
 }
