@@ -25,9 +25,9 @@ public class AchievementController : ControllerBase
      */
     [HttpPost("userIdAchievements")]
     [Authorize]
-    public IActionResult GetUserIdAchievements([FromBody] Guid UserId)
+    public IActionResult GetUserIdAchievements([FromBody] string UserId)
     {
-        List<AchievementsUsers> filteredUserAchievements = _context.AchievementsUsers.Where(au => au.UserId.Equals(UserId)).ToList();
+        List<AchievementsUsers> filteredUserAchievements = _context.AchievementsUsers.Where(au => au.UserId.ToString().Equals(UserId)).ToList();
         if (filteredUserAchievements.Count == 0)
         {
             return Ok(new { UserId = UserId, Achievements = Enumerable.Empty<Achievement>() });
