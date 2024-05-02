@@ -25,12 +25,14 @@ public class AchievementController : ControllerBase
      */
     [HttpPost("userIdAchievements")]
     [Authorize]
-    public IActionResult GetUserIdAchievements([FromBody] string UserId)
+    public IActionResult GetUserIdAchievements([FromBody] GetUserIdAchievementsModel UserIdModel)
     {
-        List<AchievementsUsers> filteredUserAchievements = _context.AchievementsUsers.Where(au => au.UserId.ToString().Equals(UserId)).ToList();
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        List<AchievementsUsers> filteredUserAchievements = _context.AchievementsUsers.Where(au => au.UserId.ToString().Equals(UserIdModel.UserId)).ToList();
         if (filteredUserAchievements.Count == 0)
         {
-            return Ok(new { UserId = UserId, Achievements = Enumerable.Empty<Achievement>() });
+            return Ok(new { UserId = UserIdModel.UserId, Achievements = Enumerable.Empty<Achievement>() });
         }
         
         List<Achievement> achievementsRes = new List<Achievement>();
@@ -44,7 +46,7 @@ public class AchievementController : ControllerBase
             }
         }
 
-        return Ok(new { UserId = UserId, Achievements = achievementsRes});
+        return Ok(new { UserId = UserIdModel.UserId, Achievements = achievementsRes});
     }
 
     /**
